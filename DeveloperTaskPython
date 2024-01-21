@@ -1,0 +1,60 @@
+
+product_prices = {
+    "A": 20,
+    "B": 40,
+    "C": 50
+}
+
+
+discount_rules = {
+    "flat_10_discount": {"condition": lambda total_price: total_price > 200, "discount": 10},
+    "bulk_5_discount": {"condition": lambda quantity: quantity > 10, "discount": 5},
+    "bulk_10_discount": {"condition": lambda total_quantity: total_quantity > 20, "discount": 10},
+    "tiered_50_discount": {"condition": lambda total_quantity: total_quantity > 30, "discount": 50}
+}
+
+
+gift_wrap_fee_per_unit = 1
+shipping_fee_per_package = 5
+items_per_package = 10
+
+def calculate_discount(total_price, quantity):
+    applicable_discounts = [conditions["discount"] for conditions in discount_rules.values() if conditions["condition"](quantity)]
+    return max(applicable_discounts, default=0)
+
+def print_invoice(product, quantity, total_price):
+    print(f"{product}: {quantity} units, Total Price: ${total_price}")
+
+def main():
+    total_amount = 0
+    total_quantity = 0
+
+    for product, price in product_prices.items():
+        quantity = int(input(f"Enter quantity for Product {product}: "))
+        is_gift_wrapped = input(f"Is Product {product} wrapped as a gift? (yes/no): ").lower() == 'yes'
+        
+        product_total_price = price * quantity
+        total_quantity += quantity
+        total_amount += product_total_price
+
+        if is_gift_wrapped:
+            product_total_price += gift_wrap_fee_per_unit * quantity
+
+        print_invoice(product, quantity, product_total_price)
+
+    subtotal = total_amount
+    discount = calculate_discount(subtotal, total_quantity)
+    subtotal_after_discount = subtotal - (subtotal * (discount / 100))
+
+    shipping_fee = (total_quantity // items_per_package) * shipping_fee_per_package
+    total_amount = subtotal_after_discount + shipping_fee
+
+    print("\nInvoice:")
+    print(f"Subtotal: ${subtotal}")
+    print(f"Discount Applied: {discount}% off, Amount: ${subtotal * (discount / 100)}")
+    print(f"Shipping Fee: ${shipping_fee}")
+    print(f"Total: ${total_amount}")
+    print("Thank you..!")
+
+if __name__ == "__main__":
+    main()
